@@ -1,0 +1,16 @@
+{
+  "name": "hiroiku/php",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Hiroiku Inoue",
+      "email": "mail@hiroiku.me"
+    }
+  ],
+  "scripts": {
+    "test": [
+      "./test -c 'php ./src/main.php' -t './cases/*' -d"
+    ]
+  }
+}
