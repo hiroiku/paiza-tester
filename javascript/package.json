@@ -1,0 +1,12 @@
+{
+  "name": "paiza-tester",
+  "version": "1.0.0",
+  "description": "paiza のスキルチェックの問題を解くための支援ツールです。 ソースコードに対して自身でテストケースを作成して，それらが通るかチェックすることができます。",
+  "main": "./src/main.js",
+  "scripts": {
+    "test": "./test -c 'node ./src/main.js' -t './cases/*.txt' -d"
+  },
+  "keywords": [],
+  "author": "Hiroiku Inoue",
+  "license": "MIT"
+}
