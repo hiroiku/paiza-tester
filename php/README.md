@@ -2,12 +2,13 @@
 
 ## Requirements
 
+- Node.js >= 10
 - PHP >= 7.0.0
 
 ## Test
 
 ```sh
-composer test
+npm test
 ```
 
 ## License
