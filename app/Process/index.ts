@@ -17,17 +17,17 @@ export abstract class Process {
     return new Promise<ProcessResult>(resolve => {
       // 子プロセスの標準出力を取得する
       let stdout = '';
-
       this.childProcess.stdout.on('data', data => {
         stdout += data;
       });
 
+      // 子プロセスの標準エラー出力を取得する
       let stderr = '';
-
       this.childProcess.stderr.on('data', data => {
         stderr += data;
       });
 
+      // 子プロセスの終了時に結果を返す
       this.childProcess.on('close', code => {
         const [seconds, nanoseconds] = process.hrtime(startTime);
         const elapsedTime = seconds + nanoseconds / 1e9;
@@ -42,12 +42,14 @@ export abstract class Process {
         });
       });
 
+      // 標準入力を子プロセスに渡す
       const lines = stdin.split('\n');
 
       for (const line of lines) {
         this.childProcess.stdin.write(line + '\n');
       }
 
+      // 標準入力を終了する
       this.childProcess.stdin.end();
     });
   }
