@@ -17,6 +17,7 @@ const manager = new ProcessManager({
 program
   .argument('<file>', 'Execution file')
   .option('-t, --test <dir>', 'Test cases directory')
+  .option('-c, --case <case>', 'Specific test case')
   .action(async (file, options) => {
     // プロジェクトのルートディレクトリを取得する
     const projectDirectory = path.resolve(__dirname, '..');
@@ -34,7 +35,17 @@ program
       return path.resolve(path.dirname(executionFilePath), 'tests');
     })();
 
-    const testCasePaths = glob.sync(path.resolve(testCaseDirectory, '**/*.txt')).sort();
+    const testCasePaths = (() => {
+      const allTestCasePaths = glob.sync(path.resolve(testCaseDirectory, '**/*.txt')).sort();
+
+      // options.caseが存在する場合はそのテストケースだけを実行
+      if (options.case) {
+        return allTestCasePaths.filter(casePath => path.basename(casePath) === options.case);
+      }
+
+      // options.caseが存在しない場合は全てのテストケースを実行
+      return allTestCasePaths;
+    })();
 
     for (const testCasePath of testCasePaths) {
       // 実行ファイルが存在しなければエラーを投げる
@@ -58,8 +69,7 @@ program
 
       // テストケースファイルを読み込む
       const testCase = fs.readFileSync(testCasePath, 'utf-8');
-      const [input, output] = testCase
-        .trim()
+      const [input, output] = (testCase.trim() + '\n')
         .split(/入力例.*?\n|出力例.*?\n/)
         .map(text => text.trim())
         .slice(1);
@@ -74,23 +84,28 @@ program
       const testCaseName = path.relative(projectDirectory, testCasePath);
 
       if (stdout === output) {
-        console.info(colors.bgGreen(' PASS '), colors.bold(testCaseName));
+        console.info(colors.bgGreen(' PASS '), colors.bold(testCaseName) + '\n');
       } else {
-        console.error(colors.bgRed(' FAIL '), colors.bold(testCaseName));
+        console.error(colors.bgRed(' FAIL '), colors.bold(testCaseName) + '\n');
       }
-      console.log('');
 
       // メモリ使用量と実行時間を表示する
       const [size, unit] = bytes(result.memoryUsage, { unitSeparator: ' ' }).split(' ');
       console.info(colors.blue('Memory Usage:'), colors.yellow(size), unit);
       console.info(colors.blue('Elapsed Time:'), colors.yellow(result.elapsedTime.toString()), 'sec');
-      console.log('');
+      console.log();
+
+      // テストケースの入力例を表示する
+      console.log(colors.blue('stdin:'));
+      console.log(colors.gray(input) + '\n');
+
+      // テストケースの出力例を表示する
+      console.log(colors.blue('stdout:'));
+      console.log(colors.gray(output) + '\n');
 
       // 標準出力を表示する
-      if (stdout) {
-        console.log(stdout);
-        console.log('');
-      }
+      console.log(colors.blue('Result:'));
+      console.log(stdout + '\n');
 
       // エラーがあれば表示する
       if (result.stderr) {
