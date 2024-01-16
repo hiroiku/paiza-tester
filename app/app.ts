@@ -7,11 +7,15 @@ import { program } from 'commander';
 import { TSNodeProcess } from '@/Process/TSNodeProcess';
 import { NodeProcess } from '@/Process/NodeProcess';
 import { ProcessManager } from '@/Process';
+import { PythonProcess } from '@/Process/PythonProcess';
+import { PHPProcess } from '@/Process/PHPProcess';
 
 // 拡張子に応じたプロセスを管理する
 const manager = new ProcessManager({
-  '.ts': TSNodeProcess,
   '.js': NodeProcess,
+  '.php': PHPProcess,
+  '.py': PythonProcess,
+  '.ts': TSNodeProcess,
 });
 
 program
