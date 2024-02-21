@@ -62,6 +62,7 @@ program
 
       // ファイルの拡張子を取得する
       const extension = path.extname(executionFilePath);
+      const testCaseName = path.relative(projectDirectory, testCasePath);
 
       // 拡張子が対応していなければエラーを投げる
       if (!manager.isProcessKey(extension)) {
@@ -76,7 +77,14 @@ program
       const [input, output] = (testCase.trim() + '\n')
         .split(/入力例.*?\n|出力例.*?\n/)
         .map(text => text.trim())
-        .slice(1);
+        .slice(1) as [string | undefined, string | undefined];
+
+      if (!input || !output) {
+        console.error(colors.bgRed(' ERROR '), colors.bold('Invalid test case.'));
+        console.error(colors.red(testCaseName) + '\n');
+
+        continue;
+      }
 
       // 拡張子に応じたプロセスを実行する
       const processConstructor = manager.get(extension);
@@ -85,7 +93,6 @@ program
       const stdout = result.stdout.trim();
 
       // テストケースの判定結果を表示する
-      const testCaseName = path.relative(projectDirectory, testCasePath);
 
       if (stdout === output) {
         console.info(colors.bgGreen(' PASS '), colors.bold(testCaseName) + '\n');
